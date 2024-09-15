@@ -30,13 +30,14 @@ CPP_API void PrepareScene(int handle,int w,int h)
 	auto finded = device->find((HWND) handle);
 	if (finded != device->end())
 	{
-		finded->second->CreateTarget(w, h);
-		finded->second->ClearAll();
+		auto directx11 = finded->second;
+		directx11->CreateTarget(w, h);
+		directx11->ClearAll();
 		vector<array<array<int, 3>, 2>> triangles;
 
 		array<array<int, 3>, 2> triangle;
 		triangle[0] = { 0, 2, 1 };
-		triangle[1] = { 128, 0, 128 };
+		triangle[1] = { 255, 0, 0 };
 		triangles.push_back(triangle);
 
 		vector<array<double, 3>> xyz;
@@ -51,12 +52,12 @@ CPP_API void PrepareScene(int handle,int w,int h)
 		normals[1] = { 0, 0, 1 };
 		normals[2] = { 0, 0, 1 };
 
-		finded->second->RenderStart();
+		directx11->RenderStart();
 
-		auto unit = finded->second->CreateTriangleColorUnit(triangles, xyz, normals);
-		finded->second->AddToSaved(unit);
-		finded->second->RenderSavedData();
-		finded->second->EndRender();
+		auto unit = directx11->CreateTriangleColorUnit(triangles, xyz, normals);
+		directx11->AddToSaved(unit);
+		directx11->RenderSavedData();
+		directx11->EndRender();
 	}
 }
 CPP_API void RenderScene(int handle)

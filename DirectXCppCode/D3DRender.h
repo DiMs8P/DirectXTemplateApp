@@ -22,10 +22,10 @@ inline void CheckHR(HRESULT hr)
 	if(hr < 0)
 	{
 //		if(hr == D2DERR_RECREATE_TARGET)return;
-		if(hr == E_OUTOFMEMORY)throw new std::exception("DirectX error Out of Memory");
-		if (hr == E_INVALIDARG)throw new std::exception("DirectX error InvalidArgs");
+		if(hr == E_OUTOFMEMORY)throw std::exception("DirectX error Out of Memory");
+		if (hr == E_INVALIDARG)throw std::exception("DirectX error InvalidArgs");
 		char buf[100];
-		throw new std::exception(("DirectX error"+std::string(_itoa(hr,buf,10))).c_str());
+		throw std::exception(("DirectX error"+std::string(_itoa(hr,buf,10))).c_str());
 	}
 }
 
@@ -276,11 +276,10 @@ public:
 	{
 		RenderingUnit unit;
 		unit.uType=RenderingUnit::UnitType::Triangle;
-		unit.IndexCount = (int) Triangles.size() * 3;
+		unit.IndexCount = Triangles.size() * 3;
 		if(unit.IndexCount == 0)return unit;
-
+	
 		std::vector<VertexForColorTriangle> vertarray(vertexes.size());
-		std::vector<DWORD> indexarray(Triangles.size()*3);
 		for(int i=0;i<vertexes.size();i++)
 		{
 			vertarray[i].Pos.x=vertexes[i][0];
@@ -304,6 +303,7 @@ public:
 			vertarray[i].Color.w=-1;
 		}
 
+		std::vector<DWORD> indexarray(Triangles.size()*3);
 		for(int i=0;i<Triangles.size();i++)
 		{
 			for(int j=0;j<3;j++)

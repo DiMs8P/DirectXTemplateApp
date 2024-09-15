@@ -1,5 +1,5 @@
 //--------------------------------------------------------------------------------------
-// Файл переделан из файла примера Microsoft DDSTextureLoader.cpp
+// пїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅпїЅ пїЅпїЅ пїЅпїЅпїЅпїЅпїЅ пїЅпїЅпїЅпїЅпїЅпїЅпїЅ Microsoft DDSTextureLoader.cpp
 //
 // Function for loading a DDS texture and creating a Direct3D 11 runtime resource for it
 //
