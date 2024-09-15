@@ -30,34 +30,26 @@ CPP_API void PrepareScene(int handle,int w,int h)
 	auto finded = device->find((HWND) handle);
 	if (finded != device->end())
 	{
-		auto directx11 = finded->second;
-		directx11->CreateTarget(w, h);
-		directx11->ClearAll();
-		vector<array<array<int, 3>, 2>> triangles;
-
-		array<array<int, 3>, 2> triangle;
-		triangle[0] = { 0, 2, 1 };
-		triangle[1] = { 255, 0, 0 };
-		triangles.push_back(triangle);
-
+		finded->second->CreateTarget(w, h);
+		finded->second->ClearAll();
 		vector<array<double, 3>> xyz;
-		xyz.resize(3);
-		xyz[0] = { 0, 0, 0.5 };
-		xyz[1] = { 1, 0, 0.5 };
-		xyz[2] = { 0, 1, 0.5 };
+		xyz.resize(8);  // ����� 24 ������� ��� 12 �������������
 
-		vector<array<double, 3>> normals;
-		normals.resize(3);
-		normals[0] = { 0, 0, 1 };
-		normals[1] = { 0, 0, 1 };
-		normals[2] = { 0, 0, 1 };
+		double size = 1.0;
+		for (int i = 0; i < 8; ++i) {
+			double x = ((i & 1) ? size : -size) / 2.0;
+			double y = ((i & 2) ? size : -size) / 2.0;
+			double z = ((i & 4) ? size : -size) / 2.0;
 
-		directx11->RenderStart();
+			xyz[i] = { x, y, z };
+		}
 
-		auto unit = directx11->CreateTriangleColorUnit(triangles, xyz, normals);
-		directx11->AddToSaved(unit);
-		directx11->RenderSavedData();
-		directx11->EndRender();
+		finded->second->RenderStart();
+
+		auto unit = finded->second->CreateCubeColorUnit(xyz);
+		finded->second->AddToSaved(unit);
+		finded->second->RenderSavedData();
+		finded->second->EndRender();
 	}
 }
 CPP_API void RenderScene(int handle)
@@ -69,6 +61,7 @@ CPP_API void RenderScene(int handle)
 		DirectX::XMStoreFloat4x4(&(finded->second->ProjectionMatrix), DirectX::XMMatrixIdentity());
 
 		finded->second->RenderSavedData();
+		//finded->second->RotateByTime();
 		finded->second->EndRender();
 	}
 }
