@@ -41,7 +41,6 @@ namespace DX
         {
             CComPtr<ID3D11Buffer> vertexBuffer;
             CComPtr<ID3D11Buffer> indexBuffer;
-            CComPtr<ID3D11ShaderResourceView> ColorTexRV;
 
             enum class UnitType { Triangle } uType;
 
@@ -336,165 +335,92 @@ namespace DX
         RenderingUnit CreateCubeColorUnit(std::vector<std::array<double, 3>>& all_points)
         {
             RenderingUnit unit;
-            switch (all_points.size())
-            {
-            case 8:
-                unit.uType = RenderingUnit::UnitType::Triangle;
-                break;
-            default:
-                break;
-            }
-            unit.IndexCount = 36;
-            if (unit.IndexCount == 0)return unit;
+		switch (all_points.size())
+		{
+		case 8:
+			unit.uType = RenderingUnit::UnitType::Triangle;
+			break;
+		default:
+			break;
+		}
+		unit.IndexCount = 36;
+		if (unit.IndexCount == 0)return unit;
 
-            std::vector<VertexForColorTriangle> vertarray(24);
-            std::vector<DWORD> indexarray(36);
-            vertarray =
-            {
-                {
-                    DirectX::XMFLOAT3(all_points[0][0], all_points[0][1], all_points[0][2]),
-                    DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[2][0], all_points[2][1], all_points[2][2]),
-                    DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0.32, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[4][0], all_points[4][1], all_points[4][2]),
-                    DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0, 0, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[6][0], all_points[6][1], all_points[6][2]),
-                    DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0.32, 0, 0, 0)
-                },
+		std::vector<VertexForColorTriangle> vertarray(24);
+		std::vector<DWORD> indexarray(36);
+		vertarray =
+		{
+			{DirectX::XMFLOAT3(all_points[0][0], all_points[0][1], all_points[0][2]), DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[2][0], all_points[2][1], all_points[2][2]), DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0.32, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[4][0], all_points[4][1], all_points[4][2]), DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0, 0, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[6][0], all_points[6][1], all_points[6][2]), DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0.32, 0, 0, 0)},
 
-                {
-                    DirectX::XMFLOAT3(all_points[5][0], all_points[5][1], all_points[5][2]),
-                    DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.64, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[7][0], all_points[7][1], all_points[7][2]),
-                    DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.34, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[3][0], all_points[3][1], all_points[3][2]),
-                    DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.34, 0, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[1][0], all_points[1][1], all_points[1][2]),
-                    DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.64, 0, 0, 0)
-                },
+			{DirectX::XMFLOAT3(all_points[5][0], all_points[5][1], all_points[5][2]), DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.64, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[7][0], all_points[7][1], all_points[7][2]), DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.34, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[3][0], all_points[3][1], all_points[3][2]), DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.34, 0, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[1][0], all_points[1][1], all_points[1][2]), DirectX::XMFLOAT3(+1, +0, +0), DirectX::XMFLOAT4(0.64, 0, 0, 0)},
 
-                {
-                    DirectX::XMFLOAT3(all_points[5][0], all_points[5][1], all_points[5][2]),
-                    DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.67, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[1][0], all_points[1][1], all_points[1][2]),
-                    DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.99, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[0][0], all_points[0][1], all_points[0][2]),
-                    DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.99, 0, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[4][0], all_points[4][1], all_points[4][2]),
-                    DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.67, 0, 0, 0)
-                },
+			{DirectX::XMFLOAT3(all_points[5][0], all_points[5][1], all_points[5][2]), DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.67, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[1][0], all_points[1][1], all_points[1][2]), DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.99, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[0][0], all_points[0][1], all_points[0][2]), DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.99, 0, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[4][0], all_points[4][1], all_points[4][2]), DirectX::XMFLOAT3(+0, -1, +0), DirectX::XMFLOAT4(0.67, 0, 0, 0)},
 
-                {
-                    DirectX::XMFLOAT3(all_points[7][0], all_points[7][1], all_points[7][2]),
-                    DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[6][0], all_points[6][1], all_points[6][2]),
-                    DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0, 0.99, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[2][0], all_points[2][1], all_points[2][2]),
-                    DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0.32, 0.99, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[3][0], all_points[3][1], all_points[3][2]),
-                    DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0.32, 0.5, 0, 0)
-                },
+			{DirectX::XMFLOAT3(all_points[7][0], all_points[7][1], all_points[7][2]), DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[6][0], all_points[6][1], all_points[6][2]), DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0, 0.99, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[2][0], all_points[2][1], all_points[2][2]), DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0.32, 0.99, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[3][0], all_points[3][1], all_points[3][2]), DirectX::XMFLOAT3(+0, +1, +0), DirectX::XMFLOAT4(0.32, 0.5, 0, 0)},
 
-                {
-                    DirectX::XMFLOAT3(all_points[0][0], all_points[0][1], all_points[0][2]),
-                    DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.34, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[2][0], all_points[2][1], all_points[2][2]),
-                    DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.34, 0.95, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[3][0], all_points[3][1], all_points[3][2]),
-                    DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.62, 0.95, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[1][0], all_points[1][1], all_points[1][2]),
-                    DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.62, 0.5, 0, 0)
-                },
+			{DirectX::XMFLOAT3(all_points[0][0], all_points[0][1], all_points[0][2]), DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.34, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[2][0], all_points[2][1], all_points[2][2]), DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.34, 0.95, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[3][0], all_points[3][1], all_points[3][2]), DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.62, 0.95, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[1][0], all_points[1][1], all_points[1][2]), DirectX::XMFLOAT3(+0, +0, -1), DirectX::XMFLOAT4(0.62, 0.5, 0, 0)},
 
-                {
-                    DirectX::XMFLOAT3(all_points[5][0], all_points[5][1], all_points[5][2]),
-                    DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.67, 0.98, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[7][0], all_points[7][1], all_points[7][2]),
-                    DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.67, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[6][0], all_points[6][1], all_points[6][2]),
-                    DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.99, 0.5, 0, 0)
-                },
-                {
-                    DirectX::XMFLOAT3(all_points[4][0], all_points[4][1], all_points[4][2]),
-                    DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.99, 0.98, 0, 0)
-                },
+			{DirectX::XMFLOAT3(all_points[5][0], all_points[5][1], all_points[5][2]), DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.67, 0.98, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[7][0], all_points[7][1], all_points[7][2]), DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.67, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[6][0], all_points[6][1], all_points[6][2]), DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.99, 0.5, 0, 0)},
+			{DirectX::XMFLOAT3(all_points[4][0], all_points[4][1], all_points[4][2]), DirectX::XMFLOAT3(+0, +0, +1), DirectX::XMFLOAT4(0.99, 0.98, 0, 0)},
+			
+		};
 
-            };
+		indexarray =
+		{
+			0, 2, 1,
+			2, 3, 1,
 
-            indexarray =
-            {
-                0, 2, 1,
-                2, 3, 1,
+			4, 6, 5,
+			6, 4, 7,
 
-                4, 6, 5,
-                6, 4, 7,
+			8, 10, 9,
+			10, 8, 11,
 
-                8, 10, 9,
-                10, 8, 11,
+			12, 14, 13,
+			14, 12, 15,
 
-                12, 14, 13,
-                14, 12, 15,
+			16, 17, 18,
+			18, 19, 16,
 
-                16, 17, 18,
-                18, 19, 16,
-
-                20, 21, 22,
-                22, 23, 20,
-            };
+			20, 21, 22,
+			22, 23, 20,
+		};
 
 
-            CD3D11_BUFFER_DESC bufferDesc((int)vertarray.size() * sizeof(VertexForColorTriangle),
-                                          D3D11_BIND_VERTEX_BUFFER);
-            D3D11_SUBRESOURCE_DATA data;
+		CD3D11_BUFFER_DESC bufferDesc((int)vertarray.size() * sizeof(VertexForColorTriangle), D3D11_BIND_VERTEX_BUFFER);
+		D3D11_SUBRESOURCE_DATA data;
 
-            data.pSysMem = vertarray.data();
-            data.SysMemPitch = 0;
-            data.SysMemSlicePitch = 0;
-            CheckHR(device->CreateBuffer(&bufferDesc, &data, &unit.vertexBuffer));
+		data.pSysMem = vertarray.data();
+		data.SysMemPitch = 0;
+		data.SysMemSlicePitch = 0;
+		CheckHR(device->CreateBuffer(&bufferDesc, &data, &unit.vertexBuffer));
 
-            {
-                CD3D11_BUFFER_DESC bufferDesc((int)indexarray.size() * sizeof(DWORD), D3D11_BIND_INDEX_BUFFER);
-                D3D11_SUBRESOURCE_DATA data;
-                data.pSysMem = indexarray.data();
-                data.SysMemPitch = 0;
-                data.SysMemSlicePitch = 0;
-                CheckHR(device->CreateBuffer(&bufferDesc, &data, &unit.indexBuffer));
-            }
-            return unit;
+		{
+			CD3D11_BUFFER_DESC bufferDesc((int)indexarray.size() * sizeof(DWORD), D3D11_BIND_INDEX_BUFFER);
+			D3D11_SUBRESOURCE_DATA data;
+			data.pSysMem = indexarray.data();
+			data.SysMemPitch = 0;
+			data.SysMemSlicePitch = 0;
+			CheckHR(device->CreateBuffer(&bufferDesc, &data, &unit.indexBuffer));
+		}
+		return unit;
         }
 
         RenderingUnit CreateTriangleColorUnit(std::vector<std::array<std::array<int, 3>, 2>>& Triangles,

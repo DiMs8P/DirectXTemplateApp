@@ -24,11 +24,7 @@ VS_OUTPUT main( float4 Pos : POSITION, float4 Color : COLOR , float3 Normal : NO
 	output.Pos = mul( output.Pos, WorldMatrix );
 	output.Pos = mul( output.Pos, View );
 	output.Pos = mul( output.Pos, Projection );
-    //output.Pos = mul( Pos, View );
-    //output.Pos = mul( output.Pos, Projection );
-	//output.Normal=mul( Normal, View );
-	//output.Normal=mul( output.Normal, Projection );
-    //output.color = Color;
-	output.color = Pos;
+
+	output.color = Color;
 	return output;
 }
