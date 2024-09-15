@@ -13,9 +13,18 @@ namespace TemplateApp
 {
     public partial class Form1 : Form
     {
+        Timer timer = new Timer();
         public Form1()
         {
             InitializeComponent();
+            timer.Interval = 30; // каждые 30 миллисекунд
+
+            timer.Tick += new EventHandler((o, ev) =>
+            {
+                dxControl1.RotateByTime();
+            });
+            timer.Start();
+
         }
         private void comboBox1_SelectedIndexChanged(object sender, EventArgs e)
         {

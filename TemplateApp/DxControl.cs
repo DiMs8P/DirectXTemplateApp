@@ -35,6 +35,11 @@ namespace TemplateApp
         {
             InitializeComponent();
         }
+        public void RotateByTime()
+        {
+            if (initialized) DllImportFunctions.RotateByTime((int)Handle);
+            Invalidate();
+        }
         protected override void OnPaintBackground(PaintEventArgs pevent) { }
 
         private void DxControl_Paint(object sender, PaintEventArgs e)
@@ -60,5 +65,7 @@ public class DllImportFunctions
 
     [DllImport("DirectXCppCode.Dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "RenderScene")]
     public static extern void RenderScene(int hwnd);
-
+    
+    [DllImport("DirectXCppCode.Dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "RotateByTime")]
+    public static extern void RotateByTime(int hwnd);
 }

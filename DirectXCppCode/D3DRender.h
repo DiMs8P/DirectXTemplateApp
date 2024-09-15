@@ -9,6 +9,7 @@
 #include <memory>
 #include <vector>
 #include <array>
+#include <chrono>
 #include <ctime>
 #include <string>
 #include <cmath>
@@ -59,8 +60,8 @@ namespace DX
         {
             DirectX::XMMATRIX mView;
             DirectX::XMMATRIX mProjection;
+            DirectX::XMMATRIX mWorldMatrix;
         };
-
 
         CComPtr<ID3D11Device> device;
         CComPtr<ID3D11DeviceContext> context;
@@ -157,7 +158,7 @@ namespace DX
 
             D3D11_RASTERIZER_DESC rdesc;
             ZeroMemory(&rdesc, sizeof(rdesc));
-            rdesc.CullMode = D3D11_CULL_MODE::D3D11_CULL_NONE;
+            rdesc.CullMode=D3D11_CULL_MODE::D3D11_CULL_BACK;
             rdesc.FillMode = D3D11_FILL_SOLID;
             rdesc.AntialiasedLineEnable = false;
             rdesc.DepthClipEnable = false;
@@ -240,13 +241,18 @@ namespace DX
             current2DBrush = scbrush;
         }
 
-        void ClearAll()
+        void Clear()
         {
-            SavedScene.clear();
-            FLOAT colorRGBA[] = {1.0f, 0.0f, 1.0f, 1.0f};
+            FLOAT colorRGBA[] = { 1.0f,1.0f,1.0f,1.0f };
             context->ClearRenderTargetView(renderTargetView, colorRGBA);
             context->ClearDepthStencilView(depthStencilView, D3D11_CLEAR_DEPTH | D3D11_CLEAR_STENCIL, 1, 0);
             context->RSSetState(rasterizerState);
+        }
+
+        void ClearAll()
+        {
+            SavedScene.clear();
+            Clear();
         }
 
         void UpdateProectionsAndLightingData()
@@ -254,6 +260,7 @@ namespace DX
             ConstantBufferStruct cb;
             cb.mView = XMMatrixTranspose(XMLoadFloat4x4(&ModelViewMatrix));
             cb.mProjection = XMMatrixTranspose(XMLoadFloat4x4(&ProjectionMatrix));
+            cb.mWorldMatrix = XMMatrixTranspose(XMLoadFloat4x4(&WorldMatrix));
             context->UpdateSubresource(constantBufferForVertexShader, 0, nullptr, &cb, 0, 0);
         }
 
@@ -293,30 +300,36 @@ namespace DX
                 break;
             }
         }
+        
+        void RotateByTime() {
+            static float angleX = 0.0f;
+            static float angleY = 0.0f;
+            static float angleZ = 0.0f;
 
-        void RotateByTime()
-        {
-            constexpr float Pi = 3.14159265358979323846;
-            static std::array<float, 3> angles = { 0.0f, 0.0f, 0.0f };
-            auto& [xAngle, yAngle, zAngle] = angles;
-            double speed = 0.01;
-            xAngle += speed * 0.5 * tan(time(nullptr));
-            if (xAngle >= 2 * Pi)
-                xAngle = 0;
-            yAngle += speed * tan(time(nullptr));
-            if (yAngle >= 2 * Pi)
-                yAngle = 0;
-            zAngle += speed * tan(time(nullptr));
-            if (zAngle >= 2 * Pi)
-                zAngle = 0;
+            static std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
 
+            auto currentTime = std::chrono::steady_clock::now();
+            std::chrono::duration<float> elapsedTime = currentTime - lastTime;
+            lastTime = currentTime;
 
-            const auto rotX = DirectX::XMMatrixRotationX(xAngle);
-            const auto rotY = DirectX::XMMatrixRotationX(yAngle);
-            const auto rotZ = DirectX::XMMatrixRotationX(zAngle);
+            float rotationSpeed = 0.5f;
 
-            DirectX::XMMATRIX multResult = rotX * rotY * rotZ;
-            DirectX::XMStoreFloat4x4(&WorldMatrix, multResult);
+            angleX += rotationSpeed * elapsedTime.count();
+            angleY += rotationSpeed * elapsedTime.count();
+            angleZ += rotationSpeed * elapsedTime.count();
+
+            float fullRotation = DirectX::XM_2PI; // 2 * PI
+            if (angleX >= fullRotation) angleX -= fullRotation;
+            if (angleY >= fullRotation) angleY -= fullRotation;
+            if (angleZ >= fullRotation) angleZ -= fullRotation;
+
+            DirectX::XMMATRIX rotX = DirectX::XMMatrixRotationX(angleX);
+            DirectX::XMMATRIX rotY = DirectX::XMMatrixRotationY(angleY);
+            DirectX::XMMATRIX rotZ = DirectX::XMMatrixRotationZ(angleZ);
+
+            DirectX::XMMATRIX worldMatrix = rotX * rotY * rotZ;
+
+            XMStoreFloat4x4(&WorldMatrix, worldMatrix);
         }
 
 
@@ -586,12 +599,6 @@ namespace DX
 
             swapChain->Present(0, 0);
         }
-
-        //bool IsLightingEnable;
-        //DirectX::XMFLOAT4 AmbientLightColor;
-        //DirectX::XMFLOAT4 DiffuseLightColor;
-        //DirectX::XMFLOAT4 SpecularLightColor;
-        //DirectX::XMFLOAT4 LightPosition;
 
         DirectX::XMFLOAT4X4 ProjectionMatrix;
         DirectX::XMFLOAT4X4 ModelViewMatrix;

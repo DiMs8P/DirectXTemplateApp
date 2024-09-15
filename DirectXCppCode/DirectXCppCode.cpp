@@ -25,6 +25,15 @@ CPP_API void InitDirectX(int handle)
 	(*device)[(HWND) handle] = make_shared<DX::Directx11>((HWND)handle);
 }
 
+CPP_API void RotateByTime(int handle)
+{
+	auto finded = device->find((HWND)handle);
+	if (finded != device->end())
+	{
+		finded->second->RotateByTime();
+	}
+}
+
 CPP_API void PrepareScene(int handle,int w,int h)
 {
 	auto finded = device->find((HWND) handle);
@@ -57,11 +66,12 @@ CPP_API void RenderScene(int handle)
 	auto finded = device->find((HWND) handle);
 	if (finded != device->end())
 	{
+		finded->second->Clear();
+		
 		DirectX::XMStoreFloat4x4(&(finded->second->ModelViewMatrix), DirectX::XMMatrixIdentity());
 		DirectX::XMStoreFloat4x4(&(finded->second->ProjectionMatrix), DirectX::XMMatrixIdentity());
 
 		finded->second->RenderSavedData();
-		//finded->second->RotateByTime();
 		finded->second->EndRender();
 	}
 }
