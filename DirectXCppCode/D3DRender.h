@@ -228,8 +228,8 @@ namespace DX
             CheckHR(renderTarget2D->CreateSolidColorBrush(D2D1::ColorF(D2D1::ColorF::Black), &scbrush));
             current2DBrush = scbrush;
 
-
-            CheckHR(CreateDDSTextureFromFile(device, L"..\\TextureExample.dds", NULL, &textureView));
+            // TODO remove redundant files
+            CheckHR(CreateDDSTextureFromFile(device, L"..\\Saved\\TextureExample3.dds", NULL, &textureView));
         }
 
         void SetNewSolidBrush(D2D1::ColorF col)
