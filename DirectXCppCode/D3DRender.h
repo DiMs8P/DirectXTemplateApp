@@ -229,7 +229,7 @@ namespace DX
             current2DBrush = scbrush;
 
             // TODO remove redundant files
-            CheckHR(CreateDDSTextureFromFile(device, L"..\\Saved\\TextureExample3.dds", NULL, &textureView));
+            CheckHR(CreateDDSTextureFromFile(device, L"..\\Saved\\TextureExample5.dds", NULL, &textureView));
         }
 
         void SetNewSolidBrush(D2D1::ColorF col)
@@ -303,7 +303,6 @@ namespace DX
         void RotateByTime() {
             static float angleX = 0.0f;
             static float angleY = 0.0f;
-            static float angleZ = 0.0f;
 
             static std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
 
@@ -311,22 +310,17 @@ namespace DX
             std::chrono::duration<float> elapsedTime = currentTime - lastTime;
             lastTime = currentTime;
 
-            float rotationSpeed = 0.5f;
-
+            float rotationSpeed = 1.5f;
             angleX += rotationSpeed * elapsedTime.count();
-            angleY += rotationSpeed * elapsedTime.count();
-            angleZ += rotationSpeed * elapsedTime.count();
+            angleY += rotationSpeed * elapsedTime.count() / 2;
 
-            float fullRotation = DirectX::XM_2PI; // 2 * PI
-            if (angleX >= fullRotation) angleX -= fullRotation;
-            if (angleY >= fullRotation) angleY -= fullRotation;
-            if (angleZ >= fullRotation) angleZ -= fullRotation;
+        	angleX = std::fmodf(angleX, 360.0f);
+        	angleY = std::fmodf(angleY, 360.0f);
 
             DirectX::XMMATRIX rotX = DirectX::XMMatrixRotationX(angleX);
             DirectX::XMMATRIX rotY = DirectX::XMMatrixRotationY(angleY);
-            DirectX::XMMATRIX rotZ = DirectX::XMMatrixRotationZ(angleZ);
 
-            DirectX::XMMATRIX worldMatrix = rotX * rotY * rotZ;
+            DirectX::XMMATRIX worldMatrix = rotX * rotY;
 
             XMStoreFloat4x4(&WorldMatrix, worldMatrix);
         }
@@ -346,9 +340,7 @@ namespace DX
 		unit.IndexCount = 36;
 		if (unit.IndexCount == 0)return unit;
 
-		std::vector<VertexForColorTriangle> vertarray(24);
-		std::vector<DWORD> indexarray(36);
-		vertarray =
+		std::vector<VertexForColorTriangle> vertarray =
 		{
 			{DirectX::XMFLOAT3(all_points[0][0], all_points[0][1], all_points[0][2]), DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0, 0.5, 0, 0)},
 			{DirectX::XMFLOAT3(all_points[2][0], all_points[2][1], all_points[2][2]), DirectX::XMFLOAT3(-1, +0, +0), DirectX::XMFLOAT4(0.32, 0.5, 0, 0)},
@@ -382,7 +374,7 @@ namespace DX
 			
 		};
 
-		indexarray =
+        std::vector<DWORD> indexarray =
 		{
 			0, 2, 1,
 			2, 3, 1,
@@ -403,7 +395,6 @@ namespace DX
 			22, 23, 20,
 		};
 
-
 		CD3D11_BUFFER_DESC bufferDesc((int)vertarray.size() * sizeof(VertexForColorTriangle), D3D11_BIND_VERTEX_BUFFER);
 		D3D11_SUBRESOURCE_DATA data;
 
@@ -421,90 +412,6 @@ namespace DX
 			CheckHR(device->CreateBuffer(&bufferDesc, &data, &unit.indexBuffer));
 		}
 		return unit;
-        }
-
-        RenderingUnit CreateTriangleColorUnit(std::vector<std::array<std::array<int, 3>, 2>>& Triangles,
-                                              std::vector<std::array<double, 3>>& vertexes,
-                                              std::vector<std::array<double, 3>>& normals)
-        //� ���� ������ -- �����������, ������ -- rgb ����
-        {
-            RenderingUnit unit;
-            unit.uType = RenderingUnit::UnitType::Triangle;
-            unit.IndexCount = Triangles.size() * 3;
-            if (unit.IndexCount == 0)return unit;
-
-            std::vector<VertexForColorTriangle> vertarray(vertexes.size());
-            for (int i = 0; i < vertexes.size(); i++)
-            {
-                vertarray[i].Pos.x = vertexes[i][0];
-                vertarray[i].Pos.y = vertexes[i][1];
-                vertarray[i].Pos.z = vertexes[i][2];
-                if (normals.size() == vertexes.size())
-                {
-                    vertarray[i].Normal.x = normals[i][0];
-                    vertarray[i].Normal.y = normals[i][1];
-                    vertarray[i].Normal.z = normals[i][2];
-                }
-                else
-                {
-                    vertarray[i].Normal.x = 0;
-                    vertarray[i].Normal.y = 0;
-                    vertarray[i].Normal.z = 1;
-                }
-                vertarray[i].Color.x = -1;
-                vertarray[i].Color.y = -1;
-                vertarray[i].Color.z = -1;
-                vertarray[i].Color.w = -1;
-            }
-
-            std::vector<DWORD> indexarray(Triangles.size() * 3);
-            for (int i = 0; i < Triangles.size(); i++)
-            {
-                for (int j = 0; j < 3; j++)
-                {
-                    int ver = Triangles[i][0][j];
-                    indexarray[i * 3 + j] = ver;
-                    DirectX::XMFLOAT4 Col;
-                    Col.x = Triangles[i][1][0] / 255.;
-                    Col.y = Triangles[i][1][1] / 255.;
-                    Col.z = Triangles[i][1][2] / 255.;
-                    Col.w = 1;
-
-                    if (vertarray[ver].Color.x == -1)
-                    {
-                        vertarray[ver].Color = Col;
-                    }
-                    else
-                    {
-                        if (vertarray[ver].Color.x != Col.x || vertarray[ver].Color.y != Col.z || vertarray[ver].Color.z
-                            != Col.z || vertarray[ver].Color.w != Col.w)
-                        {
-                            int newver = (int)vertarray.size();
-                            vertarray.push_back(vertarray[ver]);
-                            vertarray[newver].Color = Col;
-                            indexarray[i * 3 + j] = newver;
-                        }
-                    }
-                }
-            }
-
-            CD3D11_BUFFER_DESC bufferDesc((int)vertarray.size() * sizeof(VertexForColorTriangle),
-                                          D3D11_BIND_VERTEX_BUFFER);
-            D3D11_SUBRESOURCE_DATA data;
-            data.pSysMem = vertarray.data();
-            data.SysMemPitch = 0;
-            data.SysMemSlicePitch = 0;
-            CheckHR(device->CreateBuffer(&bufferDesc, &data, &unit.vertexBuffer));
-
-            {
-                CD3D11_BUFFER_DESC bufferDesc((int)indexarray.size() * sizeof(DWORD), D3D11_BIND_INDEX_BUFFER);
-                D3D11_SUBRESOURCE_DATA data;
-                data.pSysMem = indexarray.data();
-                data.SysMemPitch = 0;
-                data.SysMemSlicePitch = 0;
-                CheckHR(device->CreateBuffer(&bufferDesc, &data, &unit.indexBuffer));
-            }
-            return unit;
         }
 
         void RenderScene(std::vector<RenderingUnit>& scene)
