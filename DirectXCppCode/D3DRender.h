@@ -59,7 +59,7 @@ namespace DX
         {
             DirectX::XMMATRIX mView;
             DirectX::XMMATRIX mProjection;
-            DirectX::XMMATRIX mWorldMatrix;
+            DirectX::XMMATRIX mModelMatrix;
         };
 
         CComPtr<ID3D11Device> device;
@@ -257,9 +257,9 @@ namespace DX
         void UpdateProectionsAndLightingData()
         {
             ConstantBufferStruct cb;
-            cb.mView = XMMatrixTranspose(XMLoadFloat4x4(&ModelViewMatrix));
+            cb.mView = XMMatrixTranspose(XMLoadFloat4x4(&ViewMatrix));
             cb.mProjection = XMMatrixTranspose(XMLoadFloat4x4(&ProjectionMatrix));
-            cb.mWorldMatrix = XMMatrixTranspose(XMLoadFloat4x4(&WorldMatrix));
+            cb.mModelMatrix = XMMatrixTranspose(XMLoadFloat4x4(&ModelMatrix));
             context->UpdateSubresource(constantBufferForVertexShader, 0, nullptr, &cb, 0, 0);
         }
 
@@ -300,19 +300,13 @@ namespace DX
             }
         }
         
-        void RotateByTime() {
+        void RotateByTime(double deltaTime) {
             static float angleX = 0.0f;
             static float angleY = 0.0f;
 
-            static std::chrono::steady_clock::time_point lastTime = std::chrono::steady_clock::now();
-
-            auto currentTime = std::chrono::steady_clock::now();
-            std::chrono::duration<float> elapsedTime = currentTime - lastTime;
-            lastTime = currentTime;
-
             float rotationSpeed = 1.5f;
-            angleX += rotationSpeed * elapsedTime.count();
-            angleY += rotationSpeed * elapsedTime.count() / 2;
+            angleX += rotationSpeed * deltaTime;
+            angleY += rotationSpeed * deltaTime / 2;
 
         	angleX = std::fmodf(angleX, 360.0f);
         	angleY = std::fmodf(angleY, 360.0f);
@@ -322,7 +316,7 @@ namespace DX
 
             DirectX::XMMATRIX worldMatrix = rotX * rotY;
 
-            XMStoreFloat4x4(&WorldMatrix, worldMatrix);
+            XMStoreFloat4x4(&ModelMatrix, worldMatrix);
         }
 
 
@@ -434,7 +428,7 @@ namespace DX
         }
 
         DirectX::XMFLOAT4X4 ProjectionMatrix;
-        DirectX::XMFLOAT4X4 ModelViewMatrix;
-        DirectX::XMFLOAT4X4 WorldMatrix;
+        DirectX::XMFLOAT4X4 ViewMatrix;
+        DirectX::XMFLOAT4X4 ModelMatrix;
     };
 }

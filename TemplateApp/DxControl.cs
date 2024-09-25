@@ -8,11 +8,15 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using System.Runtime.InteropServices;
+using System.Diagnostics;
 
 namespace TemplateApp
 {
     public partial class DxControl : UserControl
     {
+        private Timer renderTimer;
+        private Stopwatch stopwatch;
+        private double previousElapsedSeconds;
         bool initialized=false;
         bool enablePaint;
         public bool EnablePaint
@@ -34,25 +38,45 @@ namespace TemplateApp
         public DxControl()
         {
             InitializeComponent();
+            InitializeRenderTimer();
+            InitializeStopwatch();
         }
-        public void RotateByTime()
+        private void InitializeRenderTimer()
         {
-            if (initialized) DllImportFunctions.RotateByTime((int)Handle);
-            Invalidate();
+            renderTimer = new Timer();
+            renderTimer.Interval = 16;
+            renderTimer.Tick += (sender, e) => Invalidate();
+            renderTimer.Start();
+        }
+
+        private void InitializeStopwatch()
+        {
+            stopwatch = Stopwatch.StartNew();
+            previousElapsedSeconds = 0;
         }
         protected override void OnPaintBackground(PaintEventArgs pevent) { }
 
         private void DxControl_Paint(object sender, PaintEventArgs e)
         {
-            if(initialized)  DllImportFunctions.RenderScene((int)Handle);
+            if (initialized)
+            {
+                double currentElapsedSeconds = stopwatch.ElapsedMilliseconds / 1000d;
+                double deltaSeconds = currentElapsedSeconds - previousElapsedSeconds;
+                previousElapsedSeconds = currentElapsedSeconds;
+
+                DllImportFunctions.RenderScene((int)Handle, deltaSeconds);
+            }
         }
 
         private void DxControl_SizeChanged(object sender, EventArgs e)
         {
-            if (initialized) EnablePaint = true;
+            if (initialized)
+            {
+                EnablePaint = true;
+            }
+
             Invalidate();
         }        
-
     }
 }
 public class DllImportFunctions
@@ -64,8 +88,5 @@ public class DllImportFunctions
     public static extern void PrepareScene(int hwnd, int w, int h);
 
     [DllImport("DirectXCppCode.Dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "RenderScene")]
-    public static extern void RenderScene(int hwnd);
-    
-    [DllImport("DirectXCppCode.Dll", CallingConvention = CallingConvention.Cdecl, EntryPoint = "RotateByTime")]
-    public static extern void RotateByTime(int hwnd);
+    public static extern void RenderScene(int hwnd, double deltaTime);
 }
